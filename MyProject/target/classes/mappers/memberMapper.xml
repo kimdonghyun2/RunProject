@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.memberMapper">
+
+	<!-- mybatis-config.xml의 typeAlias에 등록해두지 않았다면 <select id="selectMember" 
+		resultType="com.example.dto.MemberVO" > SELECT ID, PW ,NAME FROM TEST </select> 
+		이렇게 해야 한다. -->
+	
+	<!--  
+	<select id="selectMember" resultType="memberVO">
+		SELECT ID, PW, NAME FROM
+		TEST;
+	</select>
+	-->
+	
+	<select id="selectMember" resultType="memberVO" parameterType="MemberVO">
+		SELECT ID, PW, NAME 
+		  FROM TEST
+		 WHERE ID 		LIKE CONCAT('%', #{id}, '%')
+		    AND NAME 	LIKE CONCAT('%', #{name}, '%')
+		    AND PW 		LIKE CONCAT('%', #{pw}, '%');
+	</select>
+	
+	
+	<insert id="insertMember" parameterType="java.util.List">
+
+		<!-- INSERT INTO TEST (ID, PW, NAME) VALUES ( <foreach collection="list" 
+			item ="item" separator=","> (#{item.id}, #{item.pw}, #{item.name}) </foreach> 
+			) WHERENOT NOT EXISTS (select id from test WHERE ID = ${item.id}); -->
+
+		INSERT IGNORE INTO TEST(ID, PW, NAME) VALUES<!--  values --> 
+		<foreach collection="list" item="item" separator=",">
+		(
+			 #{item.id} 
+			,#{item.pw} 
+			,#{item.name}
+		)
+		<!-- 
+		SELECT * FROM ( SELECT #{item.id} ID, #{item.pw} PW , #{item.name} NAME from dual) A
+		WHERE 1 = 1 AND NOT EXISTS(SELECT ID FROM TEST B WHERE B.ID = A.ID)
+		-->
+		<!-- (  -->
+		<!-- SELECT 
+			 #{item.id} 
+			,#{item.pw} 
+			,#{item.name}
+			FROM DUAL
+			
+			WHERE NOT EXISTS(
+				SELECT ID
+				FROM TEST
+				WHERE ID = #{item.id}
+			)
+			 -->
+		</foreach>
+		
+		<!-- ) -->
+			   <!-- 
+			SELECT 	 #{item.id} 
+					,#{item.pw} 
+					,#{item.name}
+					 
+			 
+			   from dual
+					WHERE NOT EXISTS(
+					SELECT ID
+					FROM TEST
+					WHERE ID = #{item.id}
+				)
+			-->
+			<!--
+			VALUES(#{item.id}, #{item.pw}, #{item.name})
+			ON DUBLICATE KEY UPDATE =
+			PW = VALUES(PW),
+			NAME = VALUES(NAME)
+			-->
+			<!--
+			SELECT #{item.id}, #{item.pw}, #{item.name} FROM DUAL;
+			  
+			WHERE NOT EXISTS (
+				select id from test WHERE ID = #{item.id}
+			);
+			-->
+		
+		
+		<!-- INSERT INTO TEST (ID, PW, NAME) VALUES ( 'idTest', 'pwTest', 'nameTest' 
+			); -->
+	</insert>
+
+</mapper>
