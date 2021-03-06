@@ -39,11 +39,11 @@
         <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"></property>
         <!-- 로그 확인을 위해 log4jdbc 사용 -->
         <property name="url"
-            value="jdbc:log4jdbc:mysql://127.0.0.1:3306/new_schema?useSSL=false&amp;serverTimezone=UTC">
+            value="jdbc:log4jdbc:mysql://127.0.0.1:3306/study_db?useSSL=false&amp;serverTimezone=UTC">
             
         </property>
         <property name="username" value="user"></property>
-        <property name="password" value="ehdgus12@"></property>
+        <property name="password" value="password"></property>
     </bean>
     
     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
