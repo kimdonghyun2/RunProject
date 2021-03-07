@@ -14,7 +14,8 @@
 		  FROM TEST
 		 WHERE ID 		LIKE CONCAT('%', #{id}, '%')
 		   AND NAME 	LIKE CONCAT('%', #{name}, '%')
-		   AND PW 		LIKE CONCAT('%', #{pw}, '%');
+		   AND PW 		LIKE CONCAT('%', #{pw}, '%')
+		 ORDER BY length(ID), ID
 	</select>
 	
 	<insert id="insertMember" parameterType="java.util.List">
