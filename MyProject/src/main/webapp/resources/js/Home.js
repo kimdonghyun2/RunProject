@@ -1,13 +1,20 @@
 $(document).ready(function() {
 	//button_click();
+
+	//첫 그리드 set
 	set_grid();
+
+	//그리드에 name, id, pw 추가
 	add_grid();
-	//update_grid();
+
+	//재조회
 	lookup_grid();
+
+	//추가된 데이터 db에 저장(update 기능도 가지고 있음 pk = id)
 	insert_grid();
+
 });
 
-//그리드에 있는 모든 데이터 db로 저장
 
 function insert_grid() {
 
@@ -19,13 +26,13 @@ function insert_grid() {
 			url: "/saveUserList", //RequestMapping이랑 연결
 			type: "post",
 			data: JSON.stringify(items),	//JSON 형태로 변경
-			contentType: "application/json"	//json 데이터
+			contentType: "application/json"	//json 데이터 type
 
-			, success: function() {
+			, success: function() { //성공
 				console.log("저장 성공");
 
 			},
-			error: function() {
+			error: function() {	//실패
 				console.log("저장 실패", items);
 			}
 
@@ -65,13 +72,14 @@ function set_grid() {
 		height: "400px",
 		autoload: true,
 		editing: true,
+		confirmDeleting: false,
 
 		paging: true,
 		pageSize: 15,
 		pageButtonCount: 5,
 		filtering: true,
-		
-		
+
+
 		//데이터 변경, 추가, 삭제대하여 자동으로 로드되게 함
 		sorting: true,
 
@@ -80,108 +88,50 @@ function set_grid() {
 		//clients를 생성된 배열를 연결함.
 
 		controller: {
-			
+
 			loadData: function(filter) {
+				console.log("LOG : loadData 호출됨");
 				//alert(JSON.stringify(filter));
 				var d = $.Deferred();
-				
+
 				$.ajax({
 					url: "/getUserList",
 					type: "get",
 					//data : {}, 전송 파라미터 ex(ID, PW)
 					contentType: "application/json",
 					dataType: "json",
-					data : {
-						
+					data: {
+
 						/* 아래처럼 보내고 Controller 에서 @RequestParam("id") String id 으로 받아도 됨 */
-						id : filter.id,
-						pw : filter.pw,
-						name : filter.name
-						
+						id: filter.id,
+						pw: filter.pw,
+						name: filter.name
+
 					}
 					,
-							
+
 					success: function(response) {
+						//filter는 검색부분에 해당하는 데이터 처음엔 비어있음 : ""
 						console.log("filter : ", filter);
 						console.log("success: ", response);
-						//console.log(response);
-						
-						//d.resolve(response);
 					},
 					error: function(response) {
 						console.log("fail : " + response);
 
 					}
-					
-				}).done(function(response){
+
+				}).done(function(response) {
 					d.resolve(response);
 				});
-				
-				/*
-				.done(function(filter){
-					console.log("filter : " + JSON.stringify(filter));
-					//console.log("response : " + response); //JSON.stringify 붙이면 json 형태로 출력됨
-					d.resolve(filter);
-				});
-				*/
-				
-				return d.promise();
-			}
-			
-			/*
-			loadData: function(filter) {
-				var d = $.Deferred();
-
-				$.ajax({
-					type: "GET",
-					url: "/getUserList",
-					data: filter, //filtering에 들어가는 값
-					contentType: "application/json",
-				}).done(function(result) {
-					result = $.grep(result, function(item) {
-						return item.SomeField === filter.SomeField;
-					});
-					//console.log("filter: " + JSON.stringify(filter));
-					d.resolve(result);
-				})
 
 				return d.promise();
-			}
-			*/
-			/*
-			,
-
-			updateItem: function(item) {
-
 			},
 
-			deleteItem: function(item) {
-
-			},
-
-			insertItem: function(item) {
-
-			}
-			*/
 		},
 
 		fields: [
-			{	
-				/*
-				headerTemplate: function() {
-					return $("<input>").attr("type", "checkbox").attr("id", "selectAllCheckbox")
-				},
-				itemTemplate: function(_, item) {
-					return $("<input>").attr("type", "checkbox").attr("class", "singleCheckbox")
-						.prop("checked", $.inArray(item.name, selectedItems) > -1)
-						.on("change", function() {
-							$(this).is(":checked") ? selectItem($(this).parent().next().text()) : unselectItem($(this).parent().next().text());
-						});
-				},
-				align: "center",
-				width: 10,
-				sorting: false
-				*/
+			/* 따로 재정의해서 쓸 수 있음(name, id, pw, control 와 다르게) */
+			{
 				headerTemplate: function() {
 					return $("<input>").attr("type", "checkbox").attr("id", "selectAllCheckbox")
 				},
@@ -191,7 +141,7 @@ function set_grid() {
 						.on("change", function() {
 							$(this).is(":checked") ? selectItem(item) : unselectItem(item);
 						})
-						.on("click", function(event){
+						.on("click", function(event) {
 							// 안해주면 editing: true 되어있을때 체크박스 두번 눌러야 체크됨.
 							event.stopPropagation();
 						});
@@ -199,19 +149,89 @@ function set_grid() {
 				align: "center",
 				width: 10,
 				sorting: false
-				
+
 
 			},
-			//{ name: "", type: "checkbox", width : 20},//
-			{ name: "name", type: "text", width: 150 },
-			{ name: "id", type: "text", width: 150 },
-			{ name: "pw", type: "text", width: 150 },
-			{ type: "control" },
+
+			{
+				name: "name", type: "text", width: 150,
+
+				editTemplate: function(value) {
+					var $result = jsGrid.fields.number.prototype.editTemplate.call(this, value);
+
+					$result.on("keydown", function(e) {
+						if (e.which == 13) {
+							$("#jsGrid").jsGrid("updateItem");
+							return false;
+						}
+					});
+
+					setTimeout(function() {
+
+						$result.focus();
+						return false;
+					});
+					return $result;
+
+				}
+				/*insertTemplate: function(value) {
+					this.insertControl = $("<input>");
+					insert_on_enter(this.insertControl);
+					return this.insertControl;
+				},
+				editTemplate: function(value) {
+					this.editControl = $("<input>").val(value);
+					update_on_enter(this.editControl);
+					return this.editControl;
+				}*/
+
+			},
+			{
+				name: "id", type: "text", width: 150,
+				editTemplate: function(value) {
+					var $result = jsGrid.fields.number.prototype.editTemplate.call(this, value);
+					$result.on("keydown", function(e) {
+						if (e.which == 13) {
+							$("#jsGrid").jsGrid("updateItem");
+							return false;
+						}
+					});
+					return $result;
+				}
+			},
+
+			{
+				name: "pw", type: "text", width: 150,
+				editTemplate: function(value) {
+					var $result = jsGrid.fields.number.prototype.editTemplate.call(this, value);
+					$result.on("keydown", function(e) {
+						if (e.which == 13) {
+							$("#jsGrid").jsGrid("updateItem");
+							return false;
+						}
+					});
+					return $result;
+				}
+				//이것처럼 해도 됨
+				/*insertTemplate: function(value) {
+					this.insertControl = $("<input>");
+					insert_on_enter(this.insertControl);
+					return this.insertControl;
+				},
+				editTemplate: function(value) {
+					this.editControl = $("<input>").val(value);
+					update_on_enter(this.editControl);
+					return this.editControl;
+				}*/
+			},
+			{ type: "control", deleteButton: false, editing: false } /*editButton: false, deleteButton: false*/ //둘중 하나만 끌 수 있음
 
 		],
 
+		//페이지변경 OR 새로고침될때 발생하는 함수
 		onPageChanged: function() {
-			console.log("페이지 변경");
+
+			console.log("페이지 RELOAD");
 
 			//selectedItems = [];
 			$("#selectAllCheckbox").prop("checked", false);
@@ -222,77 +242,62 @@ function set_grid() {
 
 			});
 			selectedItems = [];
+		},
+
+		rowClick: function(args) {
+			var $row = $(args.event.target).closest("tr");
+
+			if (this._editingRow) {
+				this.updateItem().done($.proxy(function() {
+					this.editing && this.editItem($row);
+				}, this));
+				return;
+			}
+
+			this.editing && this.editItem($row);
 		}
-
-
-		/*
-		fields: [
-			//!!! response 컬럼 헤더랑 정확히 일치해야 함(순서 + 대소문자) !!!
-			{ name: "checked", type: "checkbox", width : 20},
-			
-			{ name: "name", type: "text", width: 150 },
-			{ name: "id", type: "text", width: 150 },
-			{ name: "pw", type: "text", width: 150 },
-			{ type: "control" },
-		]
-		*/
 
 	});
 
+	function insert_on_enter(field) {
+		field.on("keydown", function(e) {
+			if (e.keyCode == 13) {
+				$("#jsGrid").jsGrid("insertItem");
+				$("#jsGrid").jsGrid("clearInsert");
+				return false;
+			}
+		})
+	}
+
+	function update_on_enter(field) {
+		field.on("keydown", function(e) {
+			if (e.keyCode === 13) {
+				$("#jsGrid").jsGrid("updateItem");
+				return false;
+			}
+		});
+	}
+
 	/* 체크박스 관련 START */
 	var selectedItems = [];
-	
-	var selectItem = function(item) {
-        selectedItems.push(item);
-    };
- 
-    var unselectItem = function(item) {
-        selectedItems = $.grep(selectedItems, function(i) {
-            return i !== item;
-        });
-    };
 
-	
-	/*
 	var selectItem = function(item) {
-		console.log("item: " + item);
-		console.log("singleCheckbox_Length: "  + $(".singleCheckbox").length);
-		
 		selectedItems.push(item);
-		
-		if ($(".singleCheckbox").length == $(".singleCheckbox:checked").length) {
-			// .prop()는 지정한 선택자를 가진 첫번째 요소의 속성값을 가져오거나 속성값을 추가합니다
-			//HTML 입장에서의 속성(attribute)이 아닌 JavaScript 입장에서의 속성(property)
-			$("#selectAllCheckbox").prop("checked", true);
-		} else {
-			$("#selectAllCheckbox").prop("checked", false);
-		}
 	};
-
-	
 
 	var unselectItem = function(item) {
 		selectedItems = $.grep(selectedItems, function(i) {
 			return i !== item;
 		});
-		if (selectedItems.length == 0) {
-			$('#selectAllCheckbox').attr('checked', false);
-		}
-		if ($(".singleCheckbox").length == $(".singleCheckbox:checked").length) {
-			$("#selectAllCheckbox").prop("checked", true);
-		} else {
-			$("#selectAllCheckbox").prop("checked", false);
-		}
 	};
-	*/
-	
-	
+
 	$("#selectAllCheckbox").click(function(item) {
 		selectedItems = [];
 		if (this.checked) { // check select status
 			$('.singleCheckbox').each(function() {
 				this.checked = true;
-				selectItem($(this).parent().next().text());
+				selectItem(item);
+				//selectItem($(this).parent().next().text());
 			});
 		} else {
 
@@ -305,4 +310,48 @@ function set_grid() {
 	});
 
 	/* 체크박스 관련 END */
+
+	/* 체크된것 삭제 Start */
+	$("#delete_grid_btn").click(function() {
+		//한개 이상 체크되어야 confirm 뜸
+		if (!selectedItems.length || !confirm("정말 삭제 하시겠습니까?"))
+			return;
+
+		//체크된 데이터 리스트 = selectedItems
+		console.log("selectedItems : " + JSON.stringify(selectedItems));
+
+		var items = selectedItems;
+
+		$.ajax({
+			url: "/deleteUserList",
+			type: "post",
+			//data : {}, 전송 파라미터 ex(ID, PW)
+			contentType: "application/json",
+
+			data: JSON.stringify(items),
+
+			success: function() {
+
+				console.log("Delete Success");
+
+				//console.log(response);
+
+				//d.resolve(response);
+			},
+			error: function() {
+				console.log("Delete Fail : " + JSON.stringify(items));
+
+			}
+
+		}).done(function() {
+			//1페이지로 이동
+			$("#jsGrid").jsGrid("option", "pageIndex", 1);
+
+			//$("#jsGrid").jsGrid("loadData");
+			//reload
+			$("#jsGrid").trigger("reloadGrid");
+		});
+
+		selectedItems = [];
+	});
 }

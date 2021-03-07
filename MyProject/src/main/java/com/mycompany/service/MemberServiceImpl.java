@@ -33,5 +33,10 @@ public class MemberServiceImpl implements MemberService {
 	public void insertMember(List<MemberVO> insertList) throws Exception {
 		dao.insertMember(insertList);
 	}
+	
+	@Override
+	public void deleteMember(List<MemberVO> deleteList) throws Exception {
+		dao.deleteMember(deleteList);
+	}
 
 }

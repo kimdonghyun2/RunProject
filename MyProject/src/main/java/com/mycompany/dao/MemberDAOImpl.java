@@ -18,26 +18,31 @@ public class MemberDAOImpl implements MemberDAO {
 	private SqlSession sqlSession;
 
 	private static final String Namespace = "com.example.mapper.memberMapper";
-	
-	/*
-	@Override
-	public List<MemberVO> selectMember() throws Exception {
 
-		return sqlSession.selectList(Namespace + ".selectMember");
-	}
-	*/
-	
+	/*
+	 * @Override public List<MemberVO> selectMember() throws Exception {
+	 * 
+	 * return sqlSession.selectList(Namespace + ".selectMember"); }
+	 */
+
 	@Override
 	public List<MemberVO> selectMember(MemberVO searchMember) throws Exception {
 
 		return sqlSession.selectList(Namespace + ".selectMember", searchMember);
+
 	}
 
 	@Override
 	public void insertMember(List<MemberVO> insertList) throws Exception {
 		// TODO Auto-generated method stub
-		sqlSession.insert(Namespace+".insertMember", insertList);
+		sqlSession.insert(Namespace + ".insertMember", insertList);
 	}
 
-	
+	@Override
+	public void deleteMember(List<MemberVO> deleteList) throws Exception {
+		// TODO Auto-generated method stub
+		System.out.println("check : " + deleteList);
+		sqlSession.delete(Namespace + ".deleteMember", deleteList);
+	}
+
 }

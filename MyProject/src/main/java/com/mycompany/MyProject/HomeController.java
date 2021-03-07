@@ -82,10 +82,26 @@ public class HomeController {
 	@ResponseBody
 	public void saveUserList(@RequestBody List<MemberVO> insertList) throws Exception {
 		//System.out.println(insertList);		
-
+		System.out.println("!!! Save Log !!!");
+		System.out.println(insertList);
 		service.insertMember(insertList);
 		 
 		//return "home";
 
 	}
+	
+	@RequestMapping(value = "/deleteUserList", method = RequestMethod.POST)
+	// ResponseBody 를 달면 알아서 json 형태로 변경되어짐
+	@ResponseBody
+	public void deleteUserList(@RequestBody List<MemberVO> deleteList) throws Exception {
+		//System.out.println(insertList);		
+		System.out.println("!!! Delete Log !!!");
+		System.out.println(deleteList);
+		
+		service.deleteMember(deleteList);
+		 
+		//return "home";
+
+	}
+	
 }

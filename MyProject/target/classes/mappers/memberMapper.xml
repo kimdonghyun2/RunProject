@@ -9,85 +9,41 @@
 		resultType="com.example.dto.MemberVO" > SELECT ID, PW ,NAME FROM TEST </select> 
 		이렇게 해야 한다. -->
 	
-	<!--  
-	<select id="selectMember" resultType="memberVO">
-		SELECT ID, PW, NAME FROM
-		TEST;
-	</select>
-	-->
-	
 	<select id="selectMember" resultType="memberVO" parameterType="MemberVO">
 		SELECT ID, PW, NAME 
 		  FROM TEST
 		 WHERE ID 		LIKE CONCAT('%', #{id}, '%')
-		    AND NAME 	LIKE CONCAT('%', #{name}, '%')
-		    AND PW 		LIKE CONCAT('%', #{pw}, '%');
+		   AND NAME 	LIKE CONCAT('%', #{name}, '%')
+		   AND PW 		LIKE CONCAT('%', #{pw}, '%');
 	</select>
 	
-	
 	<insert id="insertMember" parameterType="java.util.List">
-
-		<!-- INSERT INTO TEST (ID, PW, NAME) VALUES ( <foreach collection="list" 
-			item ="item" separator=","> (#{item.id}, #{item.pw}, #{item.name}) </foreach> 
-			) WHERENOT NOT EXISTS (select id from test WHERE ID = ${item.id}); -->
-
 		INSERT IGNORE INTO TEST(ID, PW, NAME) VALUES<!--  values --> 
+		<!-- 넘어온 값은 item에 담김 -->
 		<foreach collection="list" item="item" separator=",">
 		(
 			 #{item.id} 
 			,#{item.pw} 
 			,#{item.name}
-		)
-		<!-- 
-		SELECT * FROM ( SELECT #{item.id} ID, #{item.pw} PW , #{item.name} NAME from dual) A
-		WHERE 1 = 1 AND NOT EXISTS(SELECT ID FROM TEST B WHERE B.ID = A.ID)
-		-->
-		<!-- (  -->
-		<!-- SELECT 
-			 #{item.id} 
-			,#{item.pw} 
-			,#{item.name}
-			FROM DUAL
-			
-			WHERE NOT EXISTS(
-				SELECT ID
-				FROM TEST
-				WHERE ID = #{item.id}
-			)
-			 -->
+		)	
 		</foreach>
-		
-		<!-- ) -->
-			   <!-- 
-			SELECT 	 #{item.id} 
-					,#{item.pw} 
-					,#{item.name}
-					 
-			 
-			   from dual
-					WHERE NOT EXISTS(
-					SELECT ID
-					FROM TEST
-					WHERE ID = #{item.id}
-				)
-			-->
-			<!--
-			VALUES(#{item.id}, #{item.pw}, #{item.name})
-			ON DUBLICATE KEY UPDATE =
+		<!-- 중복되는 key (id) 값이 있으면 update pw, name -->
+		ON DUPLICATE KEY UPDATE
+			
 			PW = VALUES(PW),
 			NAME = VALUES(NAME)
-			-->
-			<!--
-			SELECT #{item.id}, #{item.pw}, #{item.name} FROM DUAL;
-			  
-			WHERE NOT EXISTS (
-				select id from test WHERE ID = #{item.id}
-			);
-			-->
-		
-		
-		<!-- INSERT INTO TEST (ID, PW, NAME) VALUES ( 'idTest', 'pwTest', 'nameTest' 
-			); -->
 	</insert>
+	
+	<delete id="deleteMember" parameterType="java.util.List">
+		DELETE FROM TEST
+		<where>
+			<!-- separator 는 쿼리상의 구분자 where a or b 로 하겠다는 뜻 -->
+			 <foreach collection="list" item ="item" separator="OR">
+			 (
+			 	id = #{item.id}
+			 )
+			 </foreach>
+		</where>
+	</delete>
 
 </mapper>

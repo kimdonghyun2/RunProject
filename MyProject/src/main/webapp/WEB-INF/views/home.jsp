@@ -22,11 +22,13 @@
 	id : <input id ="user_id" type ="text">
 	pw : <input id ="user_pw" type ="text">
 	<br>
-	<button id="add_data"> 데이터 추가 </button>
+	<button id="add_data"> 데이터 그리드에 추가 </button>
 	<br>
-    <button id="insert_grid_btn"> 그리드 저장 </button>
+    <button id="insert_grid_btn"> 그리드에 추가된 데이터 db 저장 </button>
     <br>
     <button id="delete_grid_btn"> 체크된 것 삭제 </button>
+   	<br> 
+    <button id="update_grid_btn"> 변경사항 저장 </button>
     <!--  
     <table>
         <thead>
